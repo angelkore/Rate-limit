@@ -43,7 +43,7 @@ class RateLimitMiddleware
 
     protected $limitHandler = null;
 
-    public function __construct($host = 'localhost', $port = '6379', $pass = null, $clientIp = null)
+    public function __construct($host = 'localhost', $port = '6379', $pass = null)
     {
         $this->host = $host;
         $this->port = $port;
@@ -89,10 +89,7 @@ class RateLimitMiddleware
 
     public function __invoke(Request $request, Response $response, $next)
     {
-        $clientIp = $this->clientIp;
-        if ($clientIp == null) {
-            $clientIp = $_SERVER['REMOTE_ADDR'];
-        }
+        $clientIp = $request->getAttribute('ip_address');
         
         if (count($this->handle->keys(sprintf("%s*", str_replace('.', '', $clientIp)))) >= $this->maxRequests) {
             $handler = $this->limitHandler;
